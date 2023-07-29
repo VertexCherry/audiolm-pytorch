@@ -1,0 +1,186 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/miniconda
+{
+	"name": "audiolm-pytorch",
+	"build": { 
+		"context": "..",
+		"dockerfile": "Dockerfile"
+	},
+	"containerEnv": {
+		"TZ": "America/Los Angeles",
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+		"CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}"
+	},
+	"features": {
+		"ghcr.io/dhoeric/features/hadolint:1": {},
+		"ghcr.io/devcontainers/features/aws-cli:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"configureZshAsDefaultShell": true,
+			"installOhMyZsh": true,
+			"upgradePackages": true,
+			"username": "automatic",
+			"userUid": "automatic",
+			"userGid": "automatic"
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": true,
+			"installDockerBuildx": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/nvidia-cuda:1": {
+			"installCudnn": true,
+			"installNvtx": true,
+			"cudaVersion": "11.8",
+			"cudnnVersion": "8.6.0.163"
+		},
+		"ghcr.io/devcontainers/features/python:1": {
+			"installTools": true,
+			"optimize": true,
+			"installJupyterlab": true,
+			"version": "3.9"
+		},
+		"ghcr.io/devcontainers-contrib/features/curl-apt-get:1": {},
+		"ghcr.io/devcontainers-contrib/features/ffmpeg-apt-get:1": {},
+		"ghcr.io/devcontainers-contrib/features/nushell:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-contrib/features/wget-apt-get:1": {},
+		"ghcr.io/customink/codespaces-features/sam-cli:1": {
+			"version": "latest"
+		}
+	},
+	"runArgs": [
+		"--hostname", "nac",
+		"--shm-size=32gb",
+		"--gpus", "all"
+	],
+	"forwardPorts": [8625],
+	"postCreateCommand": "sudo chown $(whoami) /var/run/docker.sock",
+	"updateContentCommand": "git pull && pip install -e '.[dev]'",
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.ssh,target=/root/.ssh,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind",
+		"source=${env:HOME}${env:USERPROFILE}/.git-credentials,target=/root/.git-credentials,type=bind"
+	],
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			"remoteUser": "root",
+			"settings": {
+				// Disable telemetry
+				"telemetry.enableTelemetry": false,
+		
+				// Files to completely exclude from view
+				// (see also search.exclude and files.watcherExclude)
+				"files.exclude": {
+					// Ignore cached files
+					"**/__pycache__": true,
+					// Ignore files created for development installs
+					"**/*.egg-info": true,
+					// Ignore Jupyter checkpoint files
+					"**/.ipynb_checkpoints": true,
+					// Ignore cache directory, except for files which start with . (e.g. .gitignore)
+					".devcontainer/cache/*/[!\\.]*": true,
+				},
+		
+				// For linting (code format checking), disable pylint and enable
+				// pydocstyle for docstrings and flake8 for code.
+				"python.linting.pylintEnabled": false,
+				"python.linting.pydocstyleEnabled": false,
+				"python.linting.enabled": false,
+				"flake8.enabled": true,
+				"flake8.maxLineLength": 128,
+				"flake8.ignore": "E101,E111,E114,E115,E116,E117,E12,E13,E2,E3,E401,E70,W1,W2,W3,W5,E4,W4",
+		
+				// Turn on "black" for automatic code formatting
+				"python.formatting.blackPath": "/usr/local/bin/black",
+				"python.formatting.blackArgs": ["-l", "88"],
+				"editor.formatOnSave": false,
+				"editor.codeActionsOnSave": {
+					"source.organizeImports.python": true
+				},
+		
+				// Ruler for "black"-formatted line widths
+				"editor.rulers": [128],
+		
+				// Disable barely usable scrollbar
+				"workbench.editor.wrapTabs": true,
+		
+				// Turn on autosave
+				"files.autoSave": "afterDelay",
+		
+				// Show whitespace as tiny grey dots
+				"editor.renderWhitespace": "boundary",
+		
+				// Use Pylance
+				"python.languageServer": "Pylance",
+				"python.analysis.typeCheckingMode": "basic",
+		
+				// Use isort for imports
+				//"python.sortImports.path": "/opt/conda/bin/isort",
+				//"python.sortImports.args": [
+				//	"--settings-path=${workspaceFolder}/pyproject.toml"
+				//], // <https://github.com/microsoft/vscode-isort/issues/53#issuecomment-1310754796>
+		
+				// Interpret lines beginning with "# !%" as ipython magic commands
+				"jupyter.interactiveWindow.textEditor.magicCommandsAsComments": true,
+		
+				// Path of the default Python environment
+				"python.pythonPath": "/opt/conda/bin/python",
+				"python.defaultInterpreterPath": "/opt/conda/bin/python",
+		
+				// Disable the "conda activate base" command when opening a new terminal
+				"python.terminal.activateEnvironment": true,
+		
+				// Automatically keep Git up-to-date with remotes
+				"git.autofetch": "all",
+		
+				// Make sure that key combos like Ctrl+K are not intercepted by VS Code
+				// when using the terminal
+				"terminal.integrated.allowChords": false,
+		
+				"terminal.integrated.inheritEnv": false,
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.flake8",
+				"ms-python.isort",
+				"ms-toolsai.jupyter",
+				"ms-azuretools.vscode-docker",
+				"ms-vsliveshare.vsliveshare",
+				"mutantdino.resourcemonitor",
+				"davidanson.vscode-markdownlint",
+				"redhat.vscode-yaml",
+				"exiasr.hadolint",
+				"jnoortheen.xonsh",
+				"techiecouch.docker-essentials",
+				"ms-vscode-remote.vscode-remote-extensionpack",
+				"sugatoray.vscode-remotework-extension-pack",
+				"donjayamanne.python-extension-pack",
+				"demystifying-javascript.python-extensions-pack",
+				"danielsanmedium.dscod",
+				"github.copilot",
+				"github.copilot-labs",
+				"esbenp.prettier-vscode",
+				"ms-python.pylint",
+				"spmeesseman.vscode-taskexplorer",
+				"amazonwebservices.aws-toolkit-vscode",
+				"danielsanmedium.dscodegpt",
+				"github.copilot-chat",
+				"kodezi.kodezi",
+				"ms-vscode.makefile-tools",
+				"thenuprojectcontributors.vscode-nushell-lang",
+				"sukumo28.wav-preview",
+				"rsip-vision.nvidia-smi-plus",
+				"gruntfuggly.todo-tree"
+			],
+		}
+	}
+}

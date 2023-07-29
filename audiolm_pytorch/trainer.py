@@ -147,6 +147,8 @@ class SoundStreamTrainer(nn.Module):
         data_max_length: int = None,
         data_max_length_seconds: Union[int, float] = None,
         folder: str = None,
+        train_dataset: Dataset = None,
+        val_dataset: Dataset = None,
         train_dataloader: DataLoader = None,
         val_dataloader: DataLoader = None,
         lr: float = 2e-4,
@@ -227,42 +229,47 @@ class SoundStreamTrainer(nn.Module):
         self.max_grad_norm = max_grad_norm
         self.discr_max_grad_norm = discr_max_grad_norm
 
-        if folder is None:
+        if folder is None and train_dataset is None:
             assert train_dataloader is not None
             assert val_dataloader is not None
             self.dl = train_dataloader
             self.valid_dl = val_dataloader
         else:
-            assert train_dataloader is None
-            assert val_dataloader is None
-
-            # create dataset
-
-            if exists(data_max_length_seconds):
-                assert not exists(data_max_length)
-                data_max_length = int(data_max_length_seconds * soundstream.target_sample_hz)
+            if train_dataset is not None and val_dataset is not None:
+                self.train_ds  = train_dataset
+                self.val_ds  = val_dataset
+                self.dl = get_dataloader(self.train_ds, batch_size = batch_size, num_workers = dl_num_workers,)
+                self.valid_dl = get_dataloader(self.val_ds, batch_size = batch_size, num_workers = dl_num_workers)
             else:
-                assert exists(data_max_length)
+                assert train_dataloader is None
+                assert val_dataloader is None
 
-            hyperparameters['data_max_length'] = data_max_length
+                # create dataset
 
-            self.ds = SoundDataset(
-                folder,
-                max_length = data_max_length,
-                target_sample_hz = soundstream.target_sample_hz,
-                seq_len_multiple_of = soundstream.seq_len_multiple_of
-            )
+                if exists(data_max_length_seconds):
+                    assert not exists(data_max_length)
+                    data_max_length = int(data_max_length_seconds * soundstream.target_sample_hz)
+                else:
+                    assert exists(data_max_length)
 
-            # split for validation
+                hyperparameters['data_max_length'] = data_max_length
 
-            if valid_frac > 0:
-                train_size = int((1 - valid_frac) * len(self.ds))
-                valid_size = len(self.ds) - train_size
-                self.ds, self.valid_ds = random_split(self.ds, [train_size, valid_size], generator = torch.Generator().manual_seed(random_split_seed))
-                self.print(f'training with dataset of {len(self.ds)} samples and validating with randomly splitted {len(self.valid_ds)} samples')
-            else:
-                self.valid_ds = self.ds
-                self.print(f'training with shared training and valid dataset of {len(self.ds)} samples')
+                self.ds = SoundDataset(
+                    folder,
+                    max_length = data_max_length,
+                    target_sample_hz = soundstream.target_sample_hz,
+                    seq_len_multiple_of = soundstream.seq_len_multiple_of
+                )
+
+                # split for validation
+                if valid_frac > 0:
+                    train_size = int((1 - valid_frac) * len(self.ds))
+                    valid_size = len(self.ds) - train_size
+                    self.ds, self.valid_ds = random_split(self.ds, [train_size, valid_size], generator = torch.Generator().manual_seed(random_split_seed))
+                    self.print(f'training with dataset of {len(self.ds)} samples and validating with randomly splitted {len(self.valid_ds)} samples')
+                else:
+                    self.valid_ds = self.ds
+                    self.print(f'training with shared training and valid dataset of {len(self.ds)} samples')
 
             assert len(self.ds) >= batch_size, 'dataset must have sufficient samples for training'
             assert len(self.valid_ds) >= batch_size, f'validation dataset must have sufficient number of samples (currently {len(self.valid_ds)}) for training'
