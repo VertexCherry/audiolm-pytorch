@@ -1,0 +1,49 @@
+_target_: src.models.mnist_module.MNISTLitModule
+
+sample_rate: 44100
+
+encoder:
+  _target_: src.models.components.encoder.Encoder
+  encoder_dim: 64
+  encoder_rates: [2, 4, 8, 8]
+
+decoder:
+  target_: src.models.components.decoder.Decoder
+  decoder_dim: 1536
+  decoder_rates: [8, 8, 4, 2]
+
+quantizer:
+  _target_: src.models.components.nsrvq.NSResidualVectorQuantize
+  input_dim: 512
+  n_codebooks: 9
+  codebook_size: 1024
+  codebook_dim: 8
+  quantizer_dropout: 0.0
+  use_nsvq: false
+  
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 0.0001
+  betas: [0.8, 0.99]
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+# Discriminator
+discriminator:
+  target_: src.models.components.discriminators.audio_discriminator.Discriminator
+  sample_rate: 44100
+  rates: []
+  periods: [2, 3, 5, 7, 11]
+  fft_sizes: [2048, 1024, 512]
+  bands: [[0.0, 0.1]
+          [0.1, 0.25]
+          [0.25, 0.5]
+          [0.5, 0.75]
+          [0.75, 1.0]]

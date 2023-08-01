@@ -1,0 +1,36 @@
+_target_: src.data.mnist_datamodule.NACDataModule
+datasets: 
+  train:
+    _target_: src.data.datasets.ProbabilisticDataset
+    datasets: [audioset, jamendo, psychostream, youtube-mix]
+    multipleProbability: 0.33
+    transform:
+      - _target_: src.data.transforms.ToTensor
+  val:
+    dataset: 
+      psychostream:
+        root: data/psychostream
+        split: train
+        weight: 1
+      youtube-mix:
+        root: data/audio-mix
+        split: train
+        weight: 1
+    multipleProbability: [0.75, 0.25]
+    transform:
+      - _target_: src.data.transforms.ToTensor
+  test:
+    dataset: 
+      psychostream:
+        root: data/psychostream
+        split: train
+        weight: 1
+      youtube-mix:
+        root: data/audio-mix
+        split: train
+        weight: 1
+    multipleProbability: [0.75, 0.25]
+    transform:
+      - _target_: src.data.transforms.ToTensor
+)
+batch_size: 128

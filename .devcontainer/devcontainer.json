@@ -1,66 +1,29 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/miniconda
 {
-	"name": "audiolm-pytorch",
-	"build": { 
-		"context": "..",
-		"dockerfile": "Dockerfile"
+	//"image": "sebby1234/nac:dev",
+	"build": {
+		"dockerfile": "./dockerfile",
+		"context": "."
 	},
+	"name": "seabassai-api",
 	"containerEnv": {
 		"TZ": "America/Los Angeles",
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
 		"CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}"
 	},
 	"features": {
-		"ghcr.io/dhoeric/features/hadolint:1": {},
-		"ghcr.io/devcontainers/features/aws-cli:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/common-utils:2": {
-			"installZsh": true,
-			"configureZshAsDefaultShell": true,
-			"installOhMyZsh": true,
-			"upgradePackages": true,
-			"username": "automatic",
-			"userUid": "automatic",
-			"userGid": "automatic"
-		},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-			"moby": true,
-			"installDockerBuildx": true,
-			"version": "latest",
-			"dockerDashComposeVersion": "v2"
-		},
-		"ghcr.io/devcontainers/features/nvidia-cuda:1": {
-			"installCudnn": true,
-			"installNvtx": true,
-			"cudaVersion": "11.8",
-			"cudnnVersion": "8.6.0.163"
-		},
-		"ghcr.io/devcontainers/features/python:1": {
-			"installTools": true,
-			"optimize": true,
-			"installJupyterlab": true,
-			"version": "3.9"
-		},
-		"ghcr.io/devcontainers-contrib/features/curl-apt-get:1": {},
-		"ghcr.io/devcontainers-contrib/features/ffmpeg-apt-get:1": {},
-		"ghcr.io/devcontainers-contrib/features/nushell:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers-contrib/features/wget-apt-get:1": {},
-		"ghcr.io/customink/codespaces-features/sam-cli:1": {
-			"version": "latest"
-		}
+		"ghcr.io/devcontainers/features/docker-in-docker:1": {},
+		"ghcr.io/devcontainers/features/aws-cli:1": {},
+		"ghcr.io/customink/codespaces-features/sam-cli:1": {},
+		"ghcr.io/dhoeric/features/hadolint:1": {}
 	},
 	"runArgs": [
-		"--hostname", "nac",
+		"--hostname", "seabassai-api",
 		"--shm-size=32gb",
 		"--gpus", "all"
 	],
-	"forwardPorts": [8625],
+	//"forwardPorts": [8625],
 	"postCreateCommand": "sudo chown $(whoami) /var/run/docker.sock",
-	"updateContentCommand": "git pull && pip install -e '.[dev]'",
+	//"updateContentCommand": "./scripts/install_dev_env.sh",
 	"mounts": [
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
 		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind",
@@ -71,7 +34,7 @@
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
-			"remoteUser": "root",
+			//"remoteUser": "root",
 			"settings": {
 				// Disable telemetry
 				"telemetry.enableTelemetry": false,
@@ -174,7 +137,6 @@
 				"amazonwebservices.aws-toolkit-vscode",
 				"danielsanmedium.dscodegpt",
 				"github.copilot-chat",
-				"kodezi.kodezi",
 				"ms-vscode.makefile-tools",
 				"thenuprojectcontributors.vscode-nushell-lang",
 				"sukumo28.wav-preview",

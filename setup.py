@@ -19,22 +19,38 @@ setup(
     'audio generation'
   ],
   install_requires=[
-    'accelerate',
-    'beartype',
-    'einops>=0.6.1',
-    'ema-pytorch>=0.2.2',
-    'encodec',
-    'fairseq',
-    'joblib',
-    'lion-pytorch',
-    'local-attention>=1.8.4',
-    'scikit-learn',
-    'sentencepiece',
-    'torch>=1.12',
-    'torchaudio',
-    'transformers',
-    'tqdm',
-    'vector-quantize-pytorch>=1.5.14'
+        # --------- pytorch --------- #
+        'torch==2.0.*',
+        'torchaudio==2.0.*',
+        #'torchmetrics>=0.11.4',
+        'accelerate',
+        'beartype',
+        'einops>=0.6.1',
+        'ema-pytorch>=0.2.2',
+        'lion-pytorch',
+        'local-attention>=1.8.4',
+        'scikit-learn',
+
+        # --------- hydra / ray --------- #
+        'hydra-core==1.3.*',
+        'hydra-colorlog==1.2.*',
+        'hydra-optuna-sweeper==1.2.*',
+
+        # --------- misc --------- #
+        'ray[data]==2.6.*',
+        'numpy',
+        'pandas',
+        "wandb",
+        'encodec',
+        'fairseq',
+        'joblib',
+        'sentencepiece',
+        #'augly[audio]',
+        'fs',
+        'fs-s3fs',
+        'transformers',
+        'tqdm',
+        'vector-quantize-pytorch'
   ],
   classifiers=[
     'Development Status :: 4 - Beta',

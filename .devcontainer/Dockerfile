@@ -1,16 +1,20 @@
-FROM mcr.microsoft.com/devcontainers/miniconda:0-3
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+#FROM public.ecr.aws/lambda/python:3.9
 
-# Copy environment.yml (if found) to a temp location so we update the environment. Also
-# copy "noop.txt" so the COPY instruction does not fail if no environment.yml exists.
-COPY environment.yml* .devcontainer/noop.txt /tmp/conda-tmp/
-RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bin/conda env update -n base -f /tmp/conda-tmp/environment.yml; fi \
-    && rm -rf /tmp/conda-tmp
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    apt update -y && \
+    apt upgrade -y && \
+    apt install -y software-properties-common curl wget ffmpeg zip bzip2 p7zip-full ca-certificates sudo git git-lfs python3-pip python-is-python3 &&\
+    apt clean all -y && \
+    pip install --no-cache-dir torch==2.0.* torchaudio==2.0.* torchvision==0.15.* boto3 aws_lambda_powertools[all] aws_xray_sdk awscli aws-sam-cli awslambdaric &&\
+    pip cache purge && \
+    rm -rf /var/lib/apt/lists/*
 
-# [Optional] Uncomment to install a different version of Python than the default
-# RUN conda install -y python=3.6 \
-#     && pip install --no-cache-dir pipx \
-#     && pipx reinstall-all
+RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &&\
+    (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /root/.bashrc
+RUN eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && brew install zsh nushell oh-my-posh aws-sam-cli
+RUN eval "$(oh-my-posh init bash --config $(brew --prefix oh-my-posh)/themes/easy-term.omp.json)" >> ~/.bashrc 
 
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
+#WORKDIR /
+#COPY . ./
+#RUN pip install -r ./seabassai-api/app/requirements.txt

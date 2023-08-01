@@ -1,0 +1,50 @@
+# @package _global_
+debug_print_tree: true
+seed: 42
+
+sources:
+  audio_00: "tar://./data/raw_30s_audio-00.tar"
+  audio_01: "tar://./data/raw_30s_audio-01.tar"
+  audio_02: "tar://./data/raw_30s_audio-02.tar"
+  audio_03: "tar://./data/raw_30s_audio-03.tar"
+output_folder: "./data/processed"
+output_format: "mp3"
+output_file: "tar://./data/processed/music_clips.tar::/music_clips_{id::02}/clip_{id}.{ext}"
+db_file: "./data/processed/raw_30s_audio.parquet"
+
+worker:
+  cpu_cost: 0.33
+  gpu_cost: 0
+  bandwidth_cost: 0.05
+  memory_cost: 1
+  storage_cost: 1
+
+transforms@pre-transforms:
+  - resample:
+    sampling_rate: 44100
+  - normalize:
+    level: -10.0
+  - remove_silence:
+    level: -60.0
+
+transforms@post-transforms:
+  - passthrough:
+#  - to_tensor:
+#    channel_first: true
+
+output_splits:
+  - name: "train"
+    ratio: 0.8
+    clip_length: 2000
+    clip_num_per_min: 4
+    clip_select: "random"
+  - name: "val"
+    ratio: 0.1
+    clip_length: 5000
+    clip_num_per_min: 2
+    clip_select: "random"
+  - name: "test"
+    ratio: 0.1
+    clip_length: 10000
+    clip_num_per_min: 1
+    clip_select: "random"
